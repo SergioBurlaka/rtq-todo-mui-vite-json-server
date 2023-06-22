@@ -1,40 +1,101 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
 import "./App.css";
 
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import { styled } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import TextField from "@mui/material/TextField";
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+}));
+
+type TodoType = { id: number; title: string; done: boolean };
+
 function App() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState<TodoType[]>([]);
+
+  const [name, setName] = useState("Cat in the Hat");
 
   useEffect(() => {
-    fetch("http://localhost:3001/todos").then((response) => {
-      console.log(response);
-      return response.json();
-    });
+    fetch("http://localhost:3001/todos", {
+      method: "GET",
+    })
+      .then((response) => {
+        // console.log(response.body);
+        return response.json();
+      })
+      .then((data: TodoType[]) => {
+        console.log("data", data);
+
+        setCount(data);
+      });
   }, []);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("event.target.checked", event.target.checked);
+  };
+
+  const deleteHandler = (todoId: number) => {
+    console.log("todoId", todoId);
+  };
+  const addHandler = () => {
+    console.log("addHandler");
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <CssBaseline />
+      <Container>
+        <Box sx={{ width: "100%" }}>
+          <div>
+            <TextField
+              fullWidth
+              id="outlined-controlled"
+              label="Controlled"
+              value={name}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setName(event.target.value);
+              }}
+            />
+
+            <Button onClick={addHandler} variant="outlined">
+              Add
+            </Button>
+          </div>
+          <Stack spacing={2}>
+            {count.length &&
+              count.map((item) => {
+                console.log("item.done", item.done);
+                return (
+                  <Item key={item.id} elevation={3}>
+                    <Checkbox
+                      checked={item.done}
+                      onChange={handleChange}
+                      inputProps={{ "aria-label": "controlled" }}
+                    />
+                    {item.title}{" "}
+                    <Button
+                      onClick={() => deleteHandler(item.id)}
+                      variant="outlined"
+                    >
+                      Delete
+                    </Button>
+                  </Item>
+                );
+              })}
+          </Stack>
+        </Box>
+      </Container>
     </>
   );
 }
