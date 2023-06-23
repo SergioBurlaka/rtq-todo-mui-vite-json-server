@@ -1,71 +1,58 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import "./App.css";
 
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
-import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
 
 type TodoType = { id: number; title: string; done: boolean };
 
-function App() {
-  const [count, setCount] = useState<TodoType[]>([]);
+import { todoApi } from "./store/todoStore";
 
-  const [name, setName] = useState("Cat in the Hat");
+import TodoItem from "./components/TodoItem";
 
-  useEffect(() => {
-    fetch("http://localhost:3001/todos", {
-      method: "GET",
-    })
-      .then((response) => {
-        // console.log(response.body);
-        return response.json();
-      })
-      .then((data: TodoType[]) => {
-        console.log("data", data);
+const App = () => {
+  const [name, setName] = useState("");
 
-        setCount(data);
-      });
-  }, []);
+  const { data: todos } = todoApi.useGetTodosQuery();
+  const [updateTodos] = todoApi.useUpdateTodosMutation();
+  const [deleteTodo] = todoApi.useDeleteTodoMutation();
+  const [addTodo] = todoApi.useAddTodoMutation();
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("event.target.checked", event.target.checked);
-  };
+  const addHandler = useCallback(() => {
+    if (name) {
+      addTodo({ id: new Date().getTime(), title: name, done: false });
+      setName("");
+    }
+  }, [addTodo, name]);
 
-  const deleteHandler = (todoId: number) => {
-    console.log("todoId", todoId);
-  };
-  const addHandler = () => {
-    console.log("addHandler");
-  };
+  const onToggle = useCallback(
+    (todo: TodoType) => updateTodos({ ...todo, done: !todo.done }),
+    [updateTodos]
+  );
+
+  const deleteHandler = useCallback(
+    (todo: TodoType) => deleteTodo(todo),
+    [deleteTodo]
+  );
 
   return (
-    <>
+    <div>
       <CssBaseline />
       <Container>
         <Box sx={{ width: "100%" }}>
-          <div>
+          <div className="flex gap-4 shadow-3xl mb-4 p-2 rounded-sm">
             <TextField
               fullWidth
               id="outlined-controlled"
-              label="Controlled"
+              label="New todo"
               value={name}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setName(event.target.value);
-              }}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setName(event.target.value)
+              }
             />
 
             <Button onClick={addHandler} variant="outlined">
@@ -73,31 +60,18 @@ function App() {
             </Button>
           </div>
           <Stack spacing={2}>
-            {count.length &&
-              count.map((item) => {
-                console.log("item.done", item.done);
-                return (
-                  <Item key={item.id} elevation={3}>
-                    <Checkbox
-                      checked={item.done}
-                      onChange={handleChange}
-                      inputProps={{ "aria-label": "controlled" }}
-                    />
-                    {item.title}{" "}
-                    <Button
-                      onClick={() => deleteHandler(item.id)}
-                      variant="outlined"
-                    >
-                      Delete
-                    </Button>
-                  </Item>
-                );
-              })}
+            {todos?.map((item) => (
+              <TodoItem
+                item={item}
+                onToggle={() => onToggle(item)}
+                deleteHandler={() => deleteHandler(item)}
+              />
+            ))}
           </Stack>
         </Box>
       </Container>
-    </>
+    </div>
   );
-}
+};
 
 export default App;
