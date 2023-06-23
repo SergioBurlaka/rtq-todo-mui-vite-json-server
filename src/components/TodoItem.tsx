@@ -14,15 +14,15 @@ const Item = styled(Paper)(({ theme }) => ({
   alignItems: "center",
 }));
 
-type TodoType = { id: number; title: string; done: boolean };
+import type { TodoDTO } from "../store/TodoTypes";
 
-type TodoItemType = {
+type TodoItemType<T> = {
   onToggle: () => void;
   deleteHandler: () => void;
-  item: TodoType;
+  item: T;
 };
 
-const TodoItem = ({ onToggle, deleteHandler, item }: TodoItemType) => {
+const TodoItem = ({ onToggle, deleteHandler, item }: TodoItemType<TodoDTO>) => {
   return (
     <Item key={item.id} elevation={3}>
       <Checkbox

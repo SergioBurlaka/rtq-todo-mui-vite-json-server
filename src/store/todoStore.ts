@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 
-type TodoDTO = { id: number; title: string; done: boolean };
+
+import type { TodoDTO } from './TodoTypes';
 
 
 export const todoApi = createApi({

@@ -8,7 +8,7 @@ import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 
-type TodoType = { id: number; title: string; done: boolean };
+import type { TodoDTO } from "./store/TodoTypes";
 
 import { todoApi } from "./store/todoStore";
 
@@ -30,12 +30,12 @@ const App = () => {
   }, [addTodo, name]);
 
   const onToggle = useCallback(
-    (todo: TodoType) => updateTodos({ ...todo, done: !todo.done }),
+    (todo: TodoDTO) => updateTodos({ ...todo, done: !todo.done }),
     [updateTodos]
   );
 
   const deleteHandler = useCallback(
-    (todo: TodoType) => deleteTodo(todo),
+    (todo: TodoDTO) => deleteTodo(todo),
     [deleteTodo]
   );
 
